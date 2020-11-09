@@ -47,14 +47,14 @@ class GameView: SurfaceView, Runnable {
         var canvas: Canvas;
 
         while (running) {
-//            println("run");
 
             if (surfaceHolder.surface.isValid) {
                 canvas = surfaceHolder.lockCanvas();
 
                 canvas.save();
                 canvas.drawColor(Color.BLACK);
-//                canvas.drawBitmap(this.bitmap!!, 10.0f, 10.0f, this.paint);
+
+                val imageWidth = 50;
 
                 val src = Rect(0,0, 400, 400);
                 val dest = Rect(this.playerXPosition, 100, this.playerXPosition + 400, 400);
@@ -66,10 +66,10 @@ class GameView: SurfaceView, Runnable {
 
             when(this.moveDirection) {
                 MoveDirection.LEFT -> {
-                    this.playerXPosition -= 5;
+                    this.playerXPosition -= 15;
                 }
                 MoveDirection.RIGHT -> {
-                    this.playerXPosition += 5;
+                    this.playerXPosition += 15;
                 }
             }
         }
@@ -88,20 +88,6 @@ class GameView: SurfaceView, Runnable {
         running  = true;
         gameThread = Thread(this);
         gameThread!!.start();
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        println("keycode: ");
-
-/*        when (keyCode) {
-
-        }*/
-
-        return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        return super.onKeyUp(keyCode, event)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -127,11 +113,5 @@ class GameView: SurfaceView, Runnable {
         }
 
         return false;
-    }
-
-    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
-        println("onGenericMotionEvent");
-
-        return super.onGenericMotionEvent(event)
     }
 }
