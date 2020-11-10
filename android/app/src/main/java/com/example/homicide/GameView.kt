@@ -3,74 +3,74 @@ package com.example.homicide
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 
-enum class MoveDirection {
-    LEFT,
-    RIGHT,
-    STATIONARY
-}
-
 class GameView: SurfaceView, Runnable {
     private var running = false;
     private var gameThread: Thread? = null;
-  /*  private lateinit var context: Context;*/
-    private var bitmap: Bitmap? = null;
-    private lateinit var paint: Paint;
+    private lateinit var bitmap: Bitmap;
     private var surfaceHolder: SurfaceHolder = super.getHolder();
 
-    private var playerXPosition = 100;
-    private var moveDirection: MoveDirection = MoveDirection.STATIONARY;
+    private lateinit var player: Character
 
-    constructor(context: Context) : super(context) {
+    private val leftButton = Rect();
+    private val rightButton = Rect();
+    private val jumpButton = Rect();
 
-    }
+    private val buttonPaint = Paint();
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        /*this.context = context;*/
+    constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
+        val options = BitmapFactory.Options()
+        options.inScaled = false
+        this.bitmap = BitmapFactory.decodeResource(
+            this.context.resources,
+            R.drawable.terrorist,
+            options
+        );
+
+        this.buttonPaint.setARGB(128, 100, 100, 100)
+
+        this.player = Character(
+            spriteBitmap = this.bitmap,
+            animationBoxes = listOf(Rect(0, 0, 238, 290), Rect(238, 0, 462, 290)),
+            leftAnimationCycles = listOf(1),
+            rightAnimationCycles = listOf(2),
+            xPosition = 100,
+            yPosition = 200,
+            width = 400,
+            height = 400
+        )
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        println("onSizeChanged");
+        println("onSizeChanged " + w.toString() + " " + h.toString());
 
-        this.paint = Paint();
-        this.paint.color = Color.DKGRAY;
-        this.bitmap = BitmapFactory.decodeResource(this.context.resources, R.drawable.ukko);
+        this.leftButton.set(50, h - 400, 300, h - 100);
+        this.rightButton.set(350, h- 400, 600, h - 100);
+        this.jumpButton.set(w - 350, h - 400, w - 50, h - 100);
     }
 
     override fun run() {
         var canvas: Canvas;
 
         while (running) {
-
             if (surfaceHolder.surface.isValid) {
                 canvas = surfaceHolder.lockCanvas();
 
                 canvas.save();
-                canvas.drawColor(Color.BLACK);
+                canvas.drawColor(Color.WHITE);
 
-                val imageWidth = 50;
+                this.player.onDraw(canvas);
 
-                val src = Rect(0,0, 400, 400);
-                val dest = Rect(this.playerXPosition, 100, this.playerXPosition + 400, 400);
-
-                canvas.drawBitmap(this.bitmap!!, null, dest, this.paint);
+                canvas.drawRect(this.leftButton, this.buttonPaint)
+                canvas.drawRect(this.rightButton, this.buttonPaint)
+                canvas.drawRect(this.jumpButton, this.buttonPaint)
 
                 surfaceHolder.unlockCanvasAndPost(canvas);
-            }
-
-            when(this.moveDirection) {
-                MoveDirection.LEFT -> {
-                    this.playerXPosition -= 15;
-                }
-                MoveDirection.RIGHT -> {
-                    this.playerXPosition += 15;
-                }
             }
         }
     }
@@ -94,21 +94,19 @@ class GameView: SurfaceView, Runnable {
         println("touchEvent " + event.toString());
 
         when (event!!.action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (event.x < 700) {
-                    this.moveDirection = com.example.homicide.MoveDirection.LEFT;
-                } else if (event.x > 1500) {
-                    this.moveDirection = com.example.homicide.MoveDirection.RIGHT;
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_MOVE -> {
+                if (this.leftButton.contains(event.x.toInt(), event.y.toInt())) {
+                    this.player.move(CharacterMoveDirection.LEFT);
+                }
+                if (this.rightButton.contains(event.x.toInt(), event.y.toInt())) {
+                    this.player.move(CharacterMoveDirection.RIGHT);
                 }
 
                 return true;
             }
             MotionEvent.ACTION_UP -> {
-                this.moveDirection = MoveDirection.STATIONARY;
+                this.player.move(CharacterMoveDirection.STATIONARY);
                 return true;
-            }
-            MotionEvent.ACTION_MOVE -> {
-
             }
         }
 
