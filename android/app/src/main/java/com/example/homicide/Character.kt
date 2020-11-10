@@ -103,7 +103,7 @@ class Character {
     }
 
     public fun jump() {
-        this.yVelocity = 50;
+        this.yVelocity = 35;
     }
 
     public fun onDraw(canvas: Canvas) {
@@ -120,6 +120,14 @@ class Character {
                     this.xPosition += distance.toInt()
                 }
             }
+
+            if (this.yPosition < 750) {
+                this.yVelocity -= 1;
+            } else {
+                this.yPosition = 750;
+            }
+
+            this.yPosition -= this.yVelocity;
         }
 
         this.dstRect.set(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height);

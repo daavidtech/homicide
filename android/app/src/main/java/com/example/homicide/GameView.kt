@@ -38,7 +38,7 @@ class GameView: SurfaceView, Runnable {
             leftAnimationCycles = listOf(1),
             rightAnimationCycles = listOf(2),
             xPosition = 100,
-            yPosition = 200,
+            yPosition = 800,
             width = 400,
             height = 400
         )
@@ -100,6 +100,10 @@ class GameView: SurfaceView, Runnable {
                 }
                 if (this.rightButton.contains(event.x.toInt(), event.y.toInt())) {
                     this.player.move(CharacterMoveDirection.RIGHT);
+                }
+
+                if (this.jumpButton.contains(event.x.toInt(), event.y.toInt())) {
+                    this.player.jump();
                 }
 
                 return true;
