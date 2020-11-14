@@ -3,74 +3,100 @@ package com.example.homicide
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 
-enum class MoveDirection {
-    LEFT,
-    RIGHT,
-    STATIONARY
-}
-
 class GameView: SurfaceView, Runnable {
     private var running = false;
     private var gameThread: Thread? = null;
-  /*  private lateinit var context: Context;*/
-    private var bitmap: Bitmap? = null;
-    private lateinit var paint: Paint;
+    private lateinit var bitmap: Bitmap;
+    private lateinit var wallBitmap: Bitmap;
+
     private var surfaceHolder: SurfaceHolder = super.getHolder();
 
-    private var playerXPosition = 100;
-    private var moveDirection: MoveDirection = MoveDirection.STATIONARY;
+    private lateinit var player: Character
 
-    constructor(context: Context) : super(context) {
+    private val leftButton = Rect();
+    private val rightButton = Rect();
+    private val jumpButton = Rect();
 
-    }
+    private val buttonPaint = Paint();
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        /*this.context = context;*/
+    private val view: Rect = Rect();
+
+    private val gameMap = GameMap();
+
+    constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
+        val options = BitmapFactory.Options()
+        options.inScaled = false
+        this.bitmap = BitmapFactory.decodeResource(
+            this.context.resources,
+            R.drawable.terrorist,
+            options
+        );
+
+        this.wallBitmap = BitmapFactory.decodeResource(
+            this.context.resources,
+            R.drawable.wall,
+            options
+        )
+
+        this.buttonPaint.setARGB(128, 100, 100, 100)
+
+        this.player = Character(
+            gameMap = this.gameMap,
+            spriteBitmap = this.bitmap,
+            animationBoxes = listOf(Rect(0, 0, 238, 290), Rect(238, 0, 462, 290)),
+            leftAnimationCycles = listOf(1),
+            rightAnimationCycles = listOf(2),
+            hitbox = Rect(100, 200, 350, 500)
+        )
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        println("onSizeChanged");
+        println("onSizeChanged " + w.toString() + " " + h.toString());
 
-        this.paint = Paint();
-        this.paint.color = Color.DKGRAY;
-        this.bitmap = BitmapFactory.decodeResource(this.context.resources, R.drawable.ukko);
+        this.leftButton.set(50, h - 400, 300, h - 100);
+        this.rightButton.set(350, h- 400, 600, h - 100);
+        this.jumpButton.set(w - 350, h - 400, w - 50, h - 100);
+
+        this.view.set(0, 0, w, h);
     }
 
     override fun run() {
         var canvas: Canvas;
 
         while (running) {
-//            println("run");
-
             if (surfaceHolder.surface.isValid) {
                 canvas = surfaceHolder.lockCanvas();
 
                 canvas.save();
-                canvas.drawColor(Color.BLACK);
-//                canvas.drawBitmap(this.bitmap!!, 10.0f, 10.0f, this.paint);
+                canvas.drawColor(Color.WHITE);
 
-                val src = Rect(0,0, 400, 400);
-                val dest = Rect(this.playerXPosition, 100, this.playerXPosition + 400, 400);
+                this.player.draw(canvas);
 
-                canvas.drawBitmap(this.bitmap!!, null, dest, this.paint);
+                canvas.drawBitmap(this.wallBitmap, null, Rect(
+                    50,
+                    1200,
+                    1600,
+                    1300
+                ), null);
+
+                canvas.drawBitmap(this.wallBitmap, null, Rect(
+                    900,
+                    400,
+                    1700,
+                    500
+                ), null);
+
+                canvas.drawRect(this.leftButton, this.buttonPaint)
+                canvas.drawRect(this.rightButton, this.buttonPaint)
+                canvas.drawRect(this.jumpButton, this.buttonPaint)
 
                 surfaceHolder.unlockCanvasAndPost(canvas);
-            }
-
-            when(this.moveDirection) {
-                MoveDirection.LEFT -> {
-                    this.playerXPosition -= 5;
-                }
-                MoveDirection.RIGHT -> {
-                    this.playerXPosition += 5;
-                }
             }
         }
     }
@@ -90,48 +116,51 @@ class GameView: SurfaceView, Runnable {
         gameThread!!.start();
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        println("keycode: ");
-
-/*        when (keyCode) {
-
-        }*/
-
-        return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        return super.onKeyUp(keyCode, event)
-    }
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        println("touchEvent " + event.toString());
+        val action = event!!.actionMasked;
+
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                println("action down");
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                println("action pointer down");
+            }
+            MotionEvent.ACTION_POINTER_UP -> {
+                println("action pointer up");
+            }
+            MotionEvent.ACTION_UP -> {
+                println("action up");
+            }
+        }
+
+        /*println(event!!.actionMasked);*/
+
+        if (event!!.action != MotionEvent.ACTION_MOVE) {
+            println("touchEvent " + event.toString());
+        }
 
         when (event!!.action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (event.x < 700) {
-                    this.moveDirection = com.example.homicide.MoveDirection.LEFT;
-                } else if (event.x > 1500) {
-                    this.moveDirection = com.example.homicide.MoveDirection.RIGHT;
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_MOVE -> {
+                if (this.leftButton.contains(event.x.toInt(), event.y.toInt())) {
+                    this.player.move(CharacterMoveDirection.LEFT);
+                }
+                if (this.rightButton.contains(event.x.toInt(), event.y.toInt())) {
+                    this.player.move(CharacterMoveDirection.RIGHT);
+                }
+
+                if (this.jumpButton.contains(event.x.toInt(), event.y.toInt())) {
+                    this.player.jump();
                 }
 
                 return true;
             }
             MotionEvent.ACTION_UP -> {
-                this.moveDirection = MoveDirection.STATIONARY;
+                this.player.move(CharacterMoveDirection.STATIONARY);
                 return true;
-            }
-            MotionEvent.ACTION_MOVE -> {
-
             }
         }
 
         return false;
-    }
-
-    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
-        println("onGenericMotionEvent");
-
-        return super.onGenericMotionEvent(event)
     }
 }
