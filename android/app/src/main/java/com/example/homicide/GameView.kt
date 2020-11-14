@@ -11,6 +11,8 @@ class GameView: SurfaceView, Runnable {
     private var running = false;
     private var gameThread: Thread? = null;
     private lateinit var bitmap: Bitmap;
+    private lateinit var wallBitmap: Bitmap;
+
     private var surfaceHolder: SurfaceHolder = super.getHolder();
 
     private lateinit var player: Character
@@ -21,6 +23,10 @@ class GameView: SurfaceView, Runnable {
 
     private val buttonPaint = Paint();
 
+    private val view: Rect = Rect();
+
+    private val gameMap = GameMap();
+
     constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
         val options = BitmapFactory.Options()
         options.inScaled = false
@@ -30,17 +36,21 @@ class GameView: SurfaceView, Runnable {
             options
         );
 
+        this.wallBitmap = BitmapFactory.decodeResource(
+            this.context.resources,
+            R.drawable.wall,
+            options
+        )
+
         this.buttonPaint.setARGB(128, 100, 100, 100)
 
         this.player = Character(
+            gameMap = this.gameMap,
             spriteBitmap = this.bitmap,
             animationBoxes = listOf(Rect(0, 0, 238, 290), Rect(238, 0, 462, 290)),
             leftAnimationCycles = listOf(1),
             rightAnimationCycles = listOf(2),
-            xPosition = 100,
-            yPosition = 800,
-            width = 400,
-            height = 400
+            hitbox = Rect(100, 200, 350, 500)
         )
     }
 
@@ -52,6 +62,8 @@ class GameView: SurfaceView, Runnable {
         this.leftButton.set(50, h - 400, 300, h - 100);
         this.rightButton.set(350, h- 400, 600, h - 100);
         this.jumpButton.set(w - 350, h - 400, w - 50, h - 100);
+
+        this.view.set(0, 0, w, h);
     }
 
     override fun run() {
@@ -64,7 +76,21 @@ class GameView: SurfaceView, Runnable {
                 canvas.save();
                 canvas.drawColor(Color.WHITE);
 
-                this.player.onDraw(canvas);
+                this.player.draw(canvas);
+
+                canvas.drawBitmap(this.wallBitmap, null, Rect(
+                    50,
+                    1200,
+                    1600,
+                    1300
+                ), null);
+
+                canvas.drawBitmap(this.wallBitmap, null, Rect(
+                    900,
+                    400,
+                    1700,
+                    500
+                ), null);
 
                 canvas.drawRect(this.leftButton, this.buttonPaint)
                 canvas.drawRect(this.rightButton, this.buttonPaint)
@@ -91,7 +117,28 @@ class GameView: SurfaceView, Runnable {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        println("touchEvent " + event.toString());
+        val action = event!!.actionMasked;
+
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                println("action down");
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                println("action pointer down");
+            }
+            MotionEvent.ACTION_POINTER_UP -> {
+                println("action pointer up");
+            }
+            MotionEvent.ACTION_UP -> {
+                println("action up");
+            }
+        }
+
+        /*println(event!!.actionMasked);*/
+
+        if (event!!.action != MotionEvent.ACTION_MOVE) {
+            println("touchEvent " + event.toString());
+        }
 
         when (event!!.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_MOVE -> {

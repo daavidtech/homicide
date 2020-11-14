@@ -1,7 +1,6 @@
 package com.example.homicide
 
 import android.graphics.*
-import android.os.SystemClock.elapsedRealtime
 
 enum class CharacterMoveDirection {
     LEFT,
@@ -9,15 +8,9 @@ enum class CharacterMoveDirection {
     STATIONARY
 }
 
-class Character {
+class Character: ObjectPhycis, MapObject {
     // Which direction character is indenting to move
     var moveDirection = CharacterMoveDirection.STATIONARY;
-
-    var xVelocity = 0;
-
-    // Characters velocity related to y axis gravity affects
-    // how fast this value decreases.
-    var yVelocity = 0;
 
     var gravity = 1;
 
@@ -37,18 +30,12 @@ class Character {
 
     lateinit var spriteBitmap: Bitmap;
 
-    var xPosition = 0;
-    var yPosition = 0;
-    var width = 100;
-    var height = 100;
-
     private lateinit var dstRect: Rect;
-
-    var lastDrawTime = 0L;
 
     private lateinit var paint: Paint;
 
     constructor(
+        gameMap: GameMap,
         spriteBitmap: Bitmap,
         gravity: Int? = null,
         animationSpeed: Float = 1.0f,
@@ -56,11 +43,8 @@ class Character {
         leftAnimationCycles: List<Int>,
         rightAnimationCycles: List<Int>,
         speed: Int? = null,
-        xPosition: Int? = null,
-        yPosition: Int? = null,
-        width: Int? = null,
-        height: Int? = null,
-    ) {
+        hitbox: Rect? = null,
+    ): super(gameMap = gameMap) {
         this.spriteBitmap = spriteBitmap;
 
         if (gravity != null) {
@@ -71,7 +55,11 @@ class Character {
             this.speed = speed;
         }
 
-        if (xPosition != null) {
+        if (hitbox != null) {
+            this.hitbox.set(hitbox);
+        }
+
+/*        if (xPosition != null) {
             this.xPosition = xPosition;
         }
 
@@ -85,14 +73,16 @@ class Character {
 
         if (height != null) {
             this.height = height;
-        }
+        }*/
 
         this.animationSpeed = animationSpeed;
         this.animationBoxes = animationBoxes;
         this.leftAnimationCycles = leftAnimationCycles;
         this.rightAnimationCycles = rightAnimationCycles;
 
+/*
         this.dstRect = Rect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height);
+*/
 
         this.paint = Paint();
         this.paint.color = Color.DKGRAY;
@@ -100,49 +90,36 @@ class Character {
 
     public fun move(m: CharacterMoveDirection) {
         this.moveDirection = m;
+
+        when(m) {
+            CharacterMoveDirection.RIGHT -> {
+                this.xVelocity = 600;
+            }
+            CharacterMoveDirection.LEFT -> {
+                this.xVelocity = -600;
+            }
+            CharacterMoveDirection.STATIONARY -> {
+                this.xVelocity = 0;
+            }
+        }
     }
 
     public fun jump() {
-        this.yVelocity = 35;
+        this.yVelocity = -1200;
     }
 
-    public fun onDraw(canvas: Canvas) {
-        if (this.lastDrawTime > 0) {
-            val currentTime = elapsedRealtime();
-
-            val distance = (currentTime - this.lastDrawTime)
-
-            when(this.moveDirection) {
-                CharacterMoveDirection.LEFT -> {
-                    this.xPosition -= distance.toInt()
-                }
-                CharacterMoveDirection.RIGHT -> {
-                    this.xPosition += distance.toInt()
-                }
-            }
-
-            if (this.yPosition < 750) {
-                this.yVelocity -= 1;
-            } else {
-                this.yPosition = 750;
-            }
-
-            this.yPosition -= this.yVelocity;
-        }
-
-        this.dstRect.set(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height);
-
-        this.lastDrawTime = elapsedRealtime();
-
+    override public fun draw(canvas: Canvas) {
+        this.calculateChanges();
+        
         when (this.moveDirection) {
             CharacterMoveDirection.STATIONARY -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], this.dstRect, this.paint);
+                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], this.hitbox, null);
             }
             CharacterMoveDirection.RIGHT -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], this.dstRect, this.paint);
+                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], this.hitbox, null);
             }
             CharacterMoveDirection.LEFT -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[0], this.dstRect, this.paint);
+                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[0], this.hitbox, null);
             }
         }
     }
