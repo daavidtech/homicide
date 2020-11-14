@@ -8,7 +8,7 @@ enum class CharacterMoveDirection {
     STATIONARY
 }
 
-class Character: ObjectPhycis, MapObject {
+class Character: ObjectPhycis {
     // Which direction character is indenting to move
     var moveDirection = CharacterMoveDirection.STATIONARY;
 
@@ -108,7 +108,7 @@ class Character: ObjectPhycis, MapObject {
         this.yVelocity = -1200;
     }
 
-    override public fun draw(canvas: Canvas) {
+    public fun draw(canvas: Canvas) {
         this.calculateChanges();
         
         when (this.moveDirection) {

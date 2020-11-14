@@ -4,9 +4,6 @@ import android.graphics.Rect
 import android.os.SystemClock.elapsedRealtime
 
 abstract class ObjectPhycis {
-    private var gravity = 0;
-    private var movable = false;
-
     public var xVelocity = 0;
     public var yVelocity = 0;
 
@@ -132,42 +129,6 @@ abstract class ObjectPhycis {
                 }
             }
         }
-
-   /*     if (collision != null) {
-            when (collision.collisionType) {
-                CollisionType.Bottom -> {
-                    println("Collision from bottom");
-                    this.yVelocity = 0;
-                    this.moveWithCollidingBottom(dx = dx, bottom = collision.coordinate);
-                }
-                CollisionType.Top -> {
-                    this.yVelocity = 0;
-                    this.move(dx = dx, dy = 0);
-                }
-                CollisionType.Left, CollisionType.Right -> {
-                    this.xVelocity = 0;
-                    this.move(dx = 0, dy = dy);
-                }
-            }
-        } else {
-            println("No collision");
-
-        }*/
-
-/*        if (dx != this.distanceMoved) {
-            println("Time from last calculation " + timeFromLastCalculation.toString());
-            println("Distance moving " + distance.toString());
-        }
-
-
-        this.move(distance.toInt(), 0);
-
-        this.distanceMoved = distance;*/
-        /*val collisions = this.gamStage.getCollisions(this.hitbox);
-
-        if (collisions.size > 0) {
-            println("New collisions");
-        }*/
     }
 
     private fun moveWithCollidingTop(
@@ -214,7 +175,7 @@ abstract class ObjectPhycis {
         this.hitbox.set(newLeft, newTop, right, newBottom);
     }
 
-    public fun move(
+    private fun move(
         dx: Int = 0,
         dy: Int = 0,
     ) {
