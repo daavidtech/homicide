@@ -39,7 +39,7 @@ class TerroristSpawner: Spawner {
     }
 }
 
-class Terrorist: Character2 {
+class Terrorist: Character {
     constructor(
         bitmap: Bitmap,
         hitbox: Rect,

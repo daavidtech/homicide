@@ -1,7 +1,7 @@
 package com.example.homicide
 
-import android.graphics.*
-import androidx.core.graphics.times
+import android.graphics.Bitmap
+import android.graphics.Rect
 
 enum class CharacterMoveDirection {
     LEFT,
@@ -9,120 +9,55 @@ enum class CharacterMoveDirection {
     STATIONARY
 }
 
-class Character: ObjectPhycis {
-    // Which direction character is indenting to move
-    var moveDirection = CharacterMoveDirection.STATIONARY;
-
-    var gravity = 1;
-
-    // Speed which character is able to move.
-    var speed = 100;
+open class Character: Entity {
 
     // Determines how fast the walk cycle animation is displayed.
     var animationSpeed = 1.0f;
-
-    // Determines which animation is currently in use.
-    var animationNumber = 0
 
     lateinit var animationBoxes: List<Rect>;
 
     lateinit var leftAnimationCycles: List<Int>;
     lateinit var rightAnimationCycles: List<Int>;
 
-    lateinit var spriteBitmap: Bitmap;
-
-    private lateinit var dstRect: Rect;
-
-    private lateinit var paint: Paint;
-
     constructor(
-        gameMap: GameMap,
-        spriteBitmap: Bitmap,
-        gravity: Int? = null,
-        animationSpeed: Float = 1.0f,
+        bitmap: Bitmap,
+        hitbox: Rect,
         animationBoxes: List<Rect>,
         leftAnimationCycles: List<Int>,
         rightAnimationCycles: List<Int>,
-        speed: Int? = null,
-        hitbox: Rect? = null,
-    ): super(gameMap = gameMap) {
-        this.spriteBitmap = spriteBitmap;
-
-        if (gravity != null) {
-            this.gravity = gravity;
-        }
-
-        if (speed != null) {
-            this.speed = speed;
-        }
-
-        if (hitbox != null) {
-            this.hitbox.set(hitbox);
-        }
-
-/*        if (xPosition != null) {
-            this.xPosition = xPosition;
-        }
-
-        if (yPosition != null) {
-            this.yPosition = yPosition;
-        }
-
-        if (width != null) {
-            this.width = width;
-        }
-
-        if (height != null) {
-            this.height = height;
-        }*/
-
-        this.animationSpeed = animationSpeed;
+        xAcceleration: Int = 0,
+        yAcceleration: Int = 50,
+    ): super(
+        bitmap = bitmap,
+        hitbox = hitbox,
+        xAcceleration = xAcceleration,
+        yAcceleration = yAcceleration
+    ) {
         this.animationBoxes = animationBoxes;
         this.leftAnimationCycles = leftAnimationCycles;
         this.rightAnimationCycles = rightAnimationCycles;
 
-/*
-        this.dstRect = Rect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height);
-*/
-
-        this.paint = Paint();
-        this.paint.color = Color.DKGRAY;
-    }
-
-    public fun move(m: CharacterMoveDirection) {
-        this.moveDirection = m;
-
-        when(m) {
-            CharacterMoveDirection.RIGHT -> {
-                this.xVelocity = 600;
-            }
-            CharacterMoveDirection.LEFT -> {
-                this.xVelocity = -600;
-            }
-            CharacterMoveDirection.STATIONARY -> {
-                this.xVelocity = 0;
-            }
-        }
+        this.xVelocity = 0;
+        this.src = this.animationBoxes[1];
     }
 
     public fun jump() {
         this.yVelocity = -1200;
     }
 
-    public fun draw(canvas: Canvas, scale: Float = 1.0f) {
-        this.calculateChanges();
-
-        val scaledHitbox = scaleRect(this.hitbox, scale);
-        
-        when (this.moveDirection) {
-            CharacterMoveDirection.STATIONARY -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], scaledHitbox, null);
-            }
+    public fun move(m: CharacterMoveDirection) {
+        when(m) {
             CharacterMoveDirection.RIGHT -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], scaledHitbox, null);
+                this.xVelocity = 600;
+                this.src = this.animationBoxes[1];
             }
             CharacterMoveDirection.LEFT -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[0], scaledHitbox, null);
+                this.xVelocity = -600;
+                this.src = this.animationBoxes[0];
+            }
+            CharacterMoveDirection.STATIONARY -> {
+                this.xVelocity = 0;
+                this.src = this.animationBoxes[1];
             }
         }
     }

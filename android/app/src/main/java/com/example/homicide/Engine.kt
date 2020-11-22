@@ -3,6 +3,20 @@ package com.example.homicide
 import android.graphics.Canvas
 import android.graphics.Rect
 
+enum class XCollisionType {
+    Left,
+    Right,
+}
+
+data class XCollision(val coordinate: Int, val collisionType: XCollisionType)
+
+enum class YCollisionType {
+    Top,
+    Bottom
+}
+
+data class YCollision(val coordinate: Int, val collisionType: YCollisionType)
+
 class Engine {
     private val entities = mutableSetOf<Entity>();
     private val spawners = mutableMapOf<String, Spawner>();
@@ -46,9 +60,6 @@ class Engine {
                 xVelocity = positionChange.xVelocity,
                 yVelocity = positionChange.yVelocity
             )
-
-/*            entity.xVelocity = positionChange.xVelocity;
-            entity.yVelocity = positionChange.yVelocity;*/
         }
     }
 
@@ -58,10 +69,6 @@ class Engine {
                 entity.draw(canvas);
             }
         }
-    }
-
-    public fun addCollisionObserver() {
-
     }
 
     public fun implementSpawner(entityType: String, spawner: Spawner) {
