@@ -15,20 +15,20 @@ class GameView: SurfaceView, Runnable {
 
     private var surfaceHolder: SurfaceHolder = super.getHolder();
 
-    private lateinit var player: Character
-
     private val leftButton = Rect();
     private val rightButton = Rect();
     private val jumpButton = Rect();
 
-    private val buttonPaint = Paint();
+    private val gameControls = GameControls();
 
-    private val view: Rect = Rect();
+    private lateinit var knifeMurderMission: KnifeMurderMission;
 
-    private val gameMap = GameMap();
+    private val ratio = 2.0;
 
     constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
-        val options = BitmapFactory.Options()
+        this.knifeMurderMission = KnifeMurderMission(context, gameControls = this.gameControls);
+
+/*        val options = BitmapFactory.Options()
         options.inScaled = false
         this.bitmap = BitmapFactory.decodeResource(
             this.context.resources,
@@ -51,19 +51,23 @@ class GameView: SurfaceView, Runnable {
             leftAnimationCycles = listOf(1),
             rightAnimationCycles = listOf(2),
             hitbox = Rect(100, 200, 350, 500)
-        )
+        )*/
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
+        this.gameControls.setScreenSize(w, h);
+
         println("onSizeChanged " + w.toString() + " " + h.toString());
 
-        this.leftButton.set(50, h - 400, 300, h - 100);
+/*        this.leftButton.set(50, h - 400, 300, h - 100);
         this.rightButton.set(350, h- 400, 600, h - 100);
         this.jumpButton.set(w - 350, h - 400, w - 50, h - 100);
 
-        this.view.set(0, 0, w, h);
+        this.view.set(0, 0, w, h);*/
+
+        this.knifeMurderMission.setScreenSize(w, h);
     }
 
     override fun run() {
@@ -76,9 +80,13 @@ class GameView: SurfaceView, Runnable {
                 canvas.save();
                 canvas.drawColor(Color.WHITE);
 
-                this.player.draw(canvas);
+                /*this.player.draw(canvas);*/
 
-                canvas.drawBitmap(this.wallBitmap, null, Rect(
+                this.knifeMurderMission.draw(canvas);
+
+                this.gameControls.draw(canvas);
+
+/*                canvas.drawBitmap(this.wallBitmap, null, Rect(
                     50,
                     1200,
                     1600,
@@ -94,7 +102,7 @@ class GameView: SurfaceView, Runnable {
 
                 canvas.drawRect(this.leftButton, this.buttonPaint)
                 canvas.drawRect(this.rightButton, this.buttonPaint)
-                canvas.drawRect(this.jumpButton, this.buttonPaint)
+                canvas.drawRect(this.jumpButton, this.buttonPaint)*/
 
                 surfaceHolder.unlockCanvasAndPost(canvas);
             }
@@ -117,9 +125,9 @@ class GameView: SurfaceView, Runnable {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val action = event!!.actionMasked;
+        this.gameControls.handleMotionEvent(event);
 
-        when (action) {
+/*        when (action) {
             MotionEvent.ACTION_DOWN -> {
                 println("action down");
             }
@@ -132,15 +140,17 @@ class GameView: SurfaceView, Runnable {
             MotionEvent.ACTION_UP -> {
                 println("action up");
             }
-        }
+        }*/
 
         /*println(event!!.actionMasked);*/
 
-        if (event!!.action != MotionEvent.ACTION_MOVE) {
-            println("touchEvent " + event.toString());
-        }
+/*        val action = event!!.actionMasked;
 
-        when (event!!.action) {
+        if (action != MotionEvent.ACTION_MOVE) {
+            println("touchEvent " + event.toString());
+        }*/
+
+/*        when (event!!.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_MOVE -> {
                 if (this.leftButton.contains(event.x.toInt(), event.y.toInt())) {
                     this.player.move(CharacterMoveDirection.LEFT);
@@ -159,8 +169,8 @@ class GameView: SurfaceView, Runnable {
                 this.player.move(CharacterMoveDirection.STATIONARY);
                 return true;
             }
-        }
+        }*/
 
-        return false;
+        return true;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.homicide
 
 import android.graphics.*
+import androidx.core.graphics.times
 
 enum class CharacterMoveDirection {
     LEFT,
@@ -108,18 +109,20 @@ class Character: ObjectPhycis {
         this.yVelocity = -1200;
     }
 
-    public fun draw(canvas: Canvas) {
+    public fun draw(canvas: Canvas, scale: Float = 1.0f) {
         this.calculateChanges();
+
+        val scaledHitbox = scaleRect(this.hitbox, scale);
         
         when (this.moveDirection) {
             CharacterMoveDirection.STATIONARY -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], this.hitbox, null);
+                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], scaledHitbox, null);
             }
             CharacterMoveDirection.RIGHT -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], this.hitbox, null);
+                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[1], scaledHitbox, null);
             }
             CharacterMoveDirection.LEFT -> {
-                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[0], this.hitbox, null);
+                canvas.drawBitmap(this.spriteBitmap, this.animationBoxes[0], scaledHitbox, null);
             }
         }
     }
